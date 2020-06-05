@@ -1,0 +1,14 @@
+language: php
+
+php:
+    - "7.4"
+    - "nightly"
+
+before_script:
+    - travis_retry composer install --no-interaction
+
+script:
+    - composer test
+
+after_script:
+    - bash <(curl -s https://codecov.io/bash)

@@ -1,0 +1,46 @@
+{
+    "name": "phpgithook/module-tester",
+    "type": "project",
+    "description": "PHPGithook - Module tester",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Martin Aarhof",
+            "email": "martin.aarhof@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/console": "^5.1",
+        "league/flysystem": "^1.0",
+        "phpunit/phpunit": "^9.1",
+        "phpgithook/module-interface": "*"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../module-interface"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PHPGithook\\ModuleTester\\": "src"
+        }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "phpstan/phpstan": "^0.12.25"
+    },
+    "scripts": {
+        "fix": [
+            "vendor/bin/php-cs-fixer --allow-risky=yes -q fix",
+            "vendor/bin/phpstan analyse -l max src"
+        ],
+        "test": [
+            "vendor/bin/php-cs-fixer --allow-risky=yes --dry-run --diff --stop-on-violation fix",
+            "vendor/bin/phpstan analyse -l max src"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

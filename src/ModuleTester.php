@@ -19,42 +19,6 @@ abstract class ModuleTester extends TestCase
 {
     private Filesystem $fs;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $adapter = new Local($this->directoryToModule());
-        $this->fs = new Filesystem($adapter);
-    }
-
-    /**
-     * Return the directory to your module.
-     */
-    abstract protected function directoryToModule(): string;
-
-    private function getSetupClass(): ?PHPGithookSetupInterface
-    {
-        $files = $this->fs->listContents('', true);
-        foreach ($files as $file) {
-            if ('dir' === $file['type']) {
-                continue;
-            }
-
-            if ('Setup.php' === $file['basename']) {
-                self::assertTrue(true);
-                $adapter = $this->fs->getAdapter();
-                if (method_exists($adapter, 'getPathPrefix')) {
-                    $fullpath = $adapter->getPathPrefix().'/'.$file['path'];
-                    $className = ClassNamespaceResolver::getClassFullNameFromFile($fullpath);
-                    if (class_exists($className)) {
-                        return new $className();
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     /**
      * @test
      */
@@ -65,35 +29,6 @@ abstract class ModuleTester extends TestCase
         }
 
         self::assertTrue(true);
-    }
-
-    private function moduleTest(string $interface, string $type): void
-    {
-        if (!$setupClass = $this->getSetupClass()) {
-            throw new RuntimeException('Your module MUST have a "Setup.php" file');
-        }
-
-        $haveClass = false;
-        if ($setupClass instanceof $interface) {
-            self::assertTrue(true);
-            $haveClass = true;
-        }
-
-        foreach ($setupClass->classes() as $class) {
-            $classObj = new $class();
-            if ($classObj instanceof $interface) {
-                self::assertTrue(true);
-                $haveClass = true;
-            }
-        }
-
-        if (!$haveClass) {
-            $this->addWarning(sprintf(
-                "Your module does not have a method for %s\nimplement '%s' if you want to have it",
-                $type,
-                $interface
-            ));
-        }
     }
 
     /**
@@ -139,5 +74,72 @@ abstract class ModuleTester extends TestCase
     public function have_pre_push_file(): void
     {
         $this->moduleTest(PHPGithookPrepushInterface::class, 'pre push');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $adapter = new Local($this->directoryToModule());
+        $this->fs = new Filesystem($adapter);
+    }
+
+    /**
+     * Return the directory to your module.
+     */
+    abstract protected function directoryToModule(): string;
+
+    private function getSetupClass(): ?PHPGithookSetupInterface
+    {
+        $files = $this->fs->listContents('', true);
+        foreach ($files as $file) {
+            if ('dir' === $file['type']) {
+                continue;
+            }
+
+            if ('Setup.php' === $file['basename']) {
+                self::assertTrue(true);
+                $adapter = $this->fs->getAdapter();
+                if (method_exists($adapter, 'getPathPrefix')) {
+                    $fullpath = $adapter->getPathPrefix().'/'.$file['path'];
+                    $className = ClassNamespaceResolver::getClassFullNameFromFile($fullpath);
+                    if (class_exists($className)) {
+                        return new $className();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function moduleTest(string $interface, string $type): void
+    {
+        if (!$setupClass = $this->getSetupClass()) {
+            throw new RuntimeException('Your module MUST have a "Setup.php" file');
+        }
+
+        $haveClass = false;
+        if ($setupClass instanceof $interface) {
+            self::assertTrue(true);
+            $haveClass = true;
+        }
+
+        foreach ($setupClass->classes() as $class) {
+            $classObj = new $class();
+            if ($classObj instanceof $interface) {
+                self::assertTrue(true);
+                $haveClass = true;
+            }
+        }
+
+        if (!$haveClass) {
+            $this->addWarning(
+                sprintf(
+                    "Your module does not have a method for %s\nimplement '%s' if you want to have it",
+                    $type,
+                    $interface
+                )
+            );
+        }
     }
 }

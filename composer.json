@@ -14,14 +14,8 @@
         "symfony/console": "^5.1",
         "league/flysystem": "^1.0",
         "phpunit/phpunit": "^9.1",
-        "phpgithook/module-interface": "*"
+        "phpgithook/module-interface": "dev-master"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../module-interface"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "PHPGithook\\ModuleTester\\": "src"
